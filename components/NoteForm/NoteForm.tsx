@@ -51,10 +51,13 @@ const NoteForm = ({ tags }: Props) => {
       tag,
     };
 
+    if (!values.title.trim() || !values.content.trim()) {
+      alert('Title and content cannot be empty!');
+      return;
+    }
+
     mutate(values);
   };
-
-
 
   const handleCancel = () => router.push('/notes/filter/all');
 
@@ -119,7 +122,7 @@ const NoteForm = ({ tags }: Props) => {
 
 export default NoteForm;
 
-  /*   const handleSubmit = (formData: FormData) => {
+/*   const handleSubmit = (formData: FormData) => {
     const raw = Object.fromEntries(formData) as Record<string, string>;
     const newNote: NewNote = {
       title: raw.title,
