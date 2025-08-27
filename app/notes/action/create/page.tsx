@@ -3,7 +3,7 @@ import NoteForm from '@/components/NoteForm/NoteForm';
 import css from './CreateNote.module.css';
 import type { Metadata } from "next";
 
-const staticTags: NoteTag[] = [
+/* const staticTags: NoteTag[] = [
   'Work',
   'Personal',
   'Meeting',
@@ -13,7 +13,9 @@ const staticTags: NoteTag[] = [
 
 export const getTags = async (): Promise<NoteTag[]> => {
   return staticTags;
-};
+}; */
+
+const staticTags: NoteTag[] = ['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'];
 
 export const metadata: Metadata = {
   title: 'Create a Note — NoteHub',
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 const CreateNote = async () => {
-  const allTags = await getTags();
+  const allTags = staticTags;
 
   return (
     <main className={css.main}>
