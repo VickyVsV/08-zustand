@@ -6,7 +6,8 @@ import css from './NoteForm.module.css';
 import { useMutation } from '@tanstack/react-query';
 import { createNote } from '@/lib/api';
 import { NewNote } from '@/types/note';
-import { useNoteDraftStore } from '@/lib/stores/noteStore';
+import { useNoteDraftStore } from '@/lib/store/noteStore';
+import { useState } from 'react';
 
 type Props = {
   tags: NoteTag[];
@@ -38,6 +39,8 @@ const NoteForm = ({ tags }: Props) => {
     },
   });
 
+  const [error, setError] = useState('');
+
   const handleSubmit = (formData: FormData) => {
     const rawValues = Object.fromEntries(formData) as Record<string, string>;
     // проверяем, что tag корректный, иначе подставляем дефолтный
@@ -51,10 +54,12 @@ const NoteForm = ({ tags }: Props) => {
       tag,
     };
 
-    if (!values.title.trim() || !values.content.trim()) {
-      alert('Title and content cannot be empty!');
+    if (!values.title || !values.content) {
+      setError('Title and content cannot be empty!');
       return;
     }
+
+    setError('');
 
     mutate(values);
   };
@@ -72,6 +77,7 @@ const NoteForm = ({ tags }: Props) => {
           className={css.input}
           value={draft.title}
           onChange={handleChange}
+          required
         />
       </div>
 
@@ -84,6 +90,7 @@ const NoteForm = ({ tags }: Props) => {
           className={css.textarea}
           value={draft.content}
           onChange={handleChange}
+          required
         />
       </div>
 
@@ -103,6 +110,8 @@ const NoteForm = ({ tags }: Props) => {
           ))}
         </select>
       </div>
+
+      {error && <p className={css.error}>{error}</p>}
 
       <div className={css.actions}>
         <button
