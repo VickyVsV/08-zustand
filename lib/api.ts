@@ -59,33 +59,6 @@ export async function fetchNotes(
     throw new Error('Unknown error while fetching notes');
   }
 }
-/* export async function fetchNotes(
-  search: string,
-  page: number = 1,
-  perPage: number = 12,
-): Promise<GetNote> {
-  try {
-    const response = await axios.get<GetNote>(
-      'https://notehub-public.goit.study/api/notes',
-      {
-        params:
-          search.trim() !== '' ? { search, page, perPage } : { page, perPage },
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        error.response?.data?.message ||
-          `Failed to fetch notes: ${error.message}`
-      );
-    }
-    throw new Error('Unknown error while fetching notes');
-  }
-} */
 
 export async function createNote(newNote: NewNote): Promise<Note> {
   const response = await axios.post<Note>(

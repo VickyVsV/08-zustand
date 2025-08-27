@@ -6,10 +6,9 @@ import { useDebounce } from 'use-debounce';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Pagination from '@/components/Pagination/Pagination';
 import NoteList from '@/components/NoteList/NoteList';
-import NoteModal from '@/components/Modal/Modal';
-import NoteForm from '@/components/NoteForm/NoteForm';
 import { fetchNotes } from '@/lib/api';
 import type { GetNote } from '@/lib/api';
+import Link from 'next/link';
 
 interface NotesProps {
   initialData: GetNote;
@@ -18,9 +17,8 @@ interface NotesProps {
 
 export default function NotesPage({ initialData, tag }: NotesProps) {
   const [searchValue, setSearchValue] = useState('');
-  /* const [currentPage, setcurrentPage] = useState(""); */
+
   const [searchValueDebonce] = useDebounce(searchValue, 1000);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 12;
 
@@ -31,13 +29,12 @@ export default function NotesPage({ initialData, tag }: NotesProps) {
 
   const { data, isLoading } = useQuery<GetNote>({
     queryKey: ['notes', searchValueDebonce, currentPage, tag],
-    queryFn: () => fetchNotes(searchValueDebonce, currentPage, perPage, tag || undefined),
+    queryFn: () =>
+      fetchNotes(searchValueDebonce, currentPage, perPage, tag || undefined),
     placeholderData: keepPreviousData,
     initialData,
   });
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
   const totalPages = data?.totalPages ?? 0;
 
   return (
@@ -46,11 +43,10 @@ export default function NotesPage({ initialData, tag }: NotesProps) {
         <header className={css.toolbar}>
           {}
           <SearchBox value={searchValue} onChange={handleChange} />
-          {/* {<Pagination/>} */}
           {
-            <button className={css.button} onClick={openModal}>
+            <Link href="/notes/action/create" className={css.button}>
               Create note +
-            </button>
+            </Link>
           }
         </header>
         {data && totalPages > 1 && (
@@ -61,12 +57,6 @@ export default function NotesPage({ initialData, tag }: NotesProps) {
           />
         )}
         {!isLoading && data && <NoteList notes={data.notes} />}
-        {/* {isModalOpen && <NoteModal onClose={closeModal} />} */}
-        {isModalOpen && (
-          <NoteModal onClose={closeModal}>
-            <NoteForm onCancel={closeModal} onSuccess={closeModal} />
-          </NoteModal>
-        )}
       </div>
     </>
   );
