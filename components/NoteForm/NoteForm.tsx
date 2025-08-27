@@ -1,57 +1,65 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import type { NoteTag } from '@/types/note';
 import css from './NoteForm.module.css';
 import { useMutation } from '@tanstack/react-query';
 import { createNote } from '@/lib/api';
 import { NewNote } from '@/types/note';
+import { useNoteDraftStore } from '@/lib/stores/noteStore';
 
 type Props = {
   tags: NoteTag[];
 };
 
+const TAGS: NoteTag[] = ['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'];
+
 const NoteForm = ({ tags }: Props) => {
   const router = useRouter();
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [tag, setTag] = useState<NoteTag>(tags[0]);
+  const { draft, setDraft, clearDraft } = useNoteDraftStore();
+
+  const handleChange = (
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    setDraft({
+      ...draft,
+      [event.target.name]: event.target.value,
+    });
+  };
 
   const { mutate } = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
+      clearDraft();
       router.push('/notes/filter/all');
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (formData: FormData) => {
+    const rawValues = Object.fromEntries(formData) as Record<string, string>;
+    // проверяем, что tag корректный, иначе подставляем дефолтный
+    const tag: NoteTag = TAGS.includes(rawValues.tag as NoteTag)
+      ? (rawValues.tag as NoteTag)
+      : 'Todo';
 
-    const newNote: NewNote = { title, content, tag };
-    mutate(newNote);
-  };
-
-  /*   const handleSubmit = (formData: FormData) => {
-    const raw = Object.fromEntries(formData) as Record<string, string>;
-    const newNote: NewNote = {
-      title: raw.title,
-      content: raw.content,
-      tag: raw.tag as NoteTag,
+    const values: NewNote = {
+      title: rawValues.title,
+      content: rawValues.content,
+      tag,
     };
-    mutate(newNote);
-  }; */
 
-  const handleCancel = () => {
-    router.push('/notes/filter/all');
+    mutate(values);
   };
+
+
+
+  const handleCancel = () => router.push('/notes/filter/all');
 
   return (
-    <form
-      className={css.form}
-      onSubmit={handleSubmit} /* action={handleSubmit} */
-    >
+    <form className={css.form} action={handleSubmit}>
       <div className={css.formGroup}>
         <label htmlFor="title">Title</label>
         <input
@@ -59,8 +67,8 @@ const NoteForm = ({ tags }: Props) => {
           type="text"
           name="title"
           className={css.input}
-          value={title}
-          onChange={e => setTitle(e.target.value)}
+          value={draft.title}
+          onChange={handleChange}
         />
       </div>
 
@@ -71,8 +79,8 @@ const NoteForm = ({ tags }: Props) => {
           name="content"
           rows={8}
           className={css.textarea}
-          value={content}
-          onChange={e => setContent(e.target.value)}
+          value={draft.content}
+          onChange={handleChange}
         />
       </div>
 
@@ -82,8 +90,8 @@ const NoteForm = ({ tags }: Props) => {
           id="tag"
           name="tag"
           className={css.select}
-          value={tag}
-          onChange={e => setTag(e.target.value as NoteTag)}
+          value={draft.tag}
+          onChange={handleChange}
         >
           {tags.map(tag => (
             <option key={tag} value={tag}>
@@ -110,3 +118,13 @@ const NoteForm = ({ tags }: Props) => {
 };
 
 export default NoteForm;
+
+  /*   const handleSubmit = (formData: FormData) => {
+    const raw = Object.fromEntries(formData) as Record<string, string>;
+    const newNote: NewNote = {
+      title: raw.title,
+      content: raw.content,
+      tag: raw.tag as NoteTag,
+    };
+    mutate(newNote);
+  }; */
